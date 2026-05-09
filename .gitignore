@@ -4,3 +4,5 @@ build
 scripts/vivado/add_sources.tcl
 /Bender.lock
 /Bender.local
+/compile_vltor.flist
+/work-vltor/
