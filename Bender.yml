@@ -2,7 +2,7 @@ package:
   name: tech_cells_generic
 
 dependencies:
-  common_verification: { git: "https://github.com/pulp-platform/common_verification.git", version: 0.2.0 }
+  common_verification: { git: "https://github.com/chorus96/common_verification.git", version: 0.2.6 }
 
 sources:
   - target: all(any(all(not(asic), not(fpga)), tech_cells_generic_include_tc_sram), not(tech_cells_generic_exclude_tc_sram))
