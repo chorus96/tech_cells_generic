@@ -2,38 +2,43 @@
 
 `pulp_*` 이름 체계를 사용하는 레거시 전력 셀 모음입니다. 행동 모델로 단순 조합 논리로 구현됩니다.
 
-> **Deprecated**: 신규 설계에서는 [`src/tc_pwr.sv`](../tc_pwr.sv.md)의 `tc_pwr_*` 셀을 사용하세요.
+> **Deprecated** — 신규 설계에서는 [`src/tc_pwr.sv`](../tc_pwr.sv.md)의 `tc_pwr_*` 셀을 사용하세요.
 
-## 포함 모듈
+## 셀 구조
 
-### 레벨 시프터
+```mermaid
+flowchart LR
+    subgraph LS["레벨 시프터 계열"]
+        direction TB
+        LS1["pulp_level_shifter_in\nout = in_i"]
+        LS2["pulp_level_shifter_in_clamp\nout = clamp ? 0 : in_i"]
+        LS3["pulp_level_shifter_inout\ndata_o = data_i"]
+        LS4["pulp_level_shifter_out\nout = in_i"]
+        LS5["pulp_level_shifter_out_clamp\nout = clamp ? 0 : in_i"]
+    end
 
-| 모듈 | 입력 | 출력 | 설명 |
-|------|------|------|------|
-| `pulp_level_shifter_in` | `in_i` | `out_o` | 입력 방향 레벨 시프터 (feedthrough) |
-| `pulp_level_shifter_in_clamp` | `in_i`, `clamp_i` | `out_o` | `clamp_i`=1 시 `1'b0` 출력 |
-| `pulp_level_shifter_inout` | `data_i` | `data_o` | 양방향 레벨 시프터 (feedthrough) |
-| `pulp_level_shifter_out` | `in_i` | `out_o` | 출력 방향 레벨 시프터 (feedthrough) |
-| `pulp_level_shifter_out_clamp` | `in_i`, `clamp_i` | `out_o` | `clamp_i`=1 시 `1'b0` 출력 |
+    subgraph PG["파워/아이솔레이션"]
+        direction TB
+        PG1["pulp_power_gating\nsleepout = sleep_i"]
+        ISO0["pulp_isolation_0\ndata_o = ena ? data_i : 0"]
+        ISO1["pulp_isolation_1\ndata_o = ena ? data_i : 1"]
+    end
+```
 
-### 파워 게이팅
+## 포함 모듈 및 `tc_pwr` 매핑
 
-| 모듈 | 입력 | 출력 | 설명 |
-|------|------|------|------|
-| `pulp_power_gating` | `sleep_i` | `sleepout_o` | 파워 게이트 신호 (feedthrough) |
-
-### 아이솔레이션
-
-| 모듈 | 입력 | 출력 | 설명 |
-|------|------|------|------|
-| `pulp_isolation_0` | `data_i`, `ena_i` | `data_o` | `ena_i`=0 시 `1'b0`으로 아이솔레이션 |
-| `pulp_isolation_1` | `data_i`, `ena_i` | `data_o` | `ena_i`=0 시 `1'b1`으로 아이솔레이션 |
-
-## `tc_pwr.sv`와의 차이
-
-기능적으로 동일하며 이름 체계만 다릅니다. `tc_pwr.sv`는 `_clamp_lo`/`_clamp_hi`로 명확히 구분합니다.
+| 레거시 모듈 | `tc_pwr.sv` 대응 |
+|------------|-----------------|
+| `pulp_level_shifter_in` | `tc_pwr_level_shifter_in` |
+| `pulp_level_shifter_in_clamp` | `tc_pwr_level_shifter_in_clamp_lo` |
+| `pulp_level_shifter_inout` | — (양방향 feedthrough) |
+| `pulp_level_shifter_out` | `tc_pwr_level_shifter_out` |
+| `pulp_level_shifter_out_clamp` | `tc_pwr_level_shifter_out_clamp_lo` |
+| `pulp_power_gating` | `tc_pwr_power_gating` |
+| `pulp_isolation_0` | `tc_pwr_isolation_lo` |
+| `pulp_isolation_1` | `tc_pwr_isolation_hi` |
 
 ## 관련 파일
 
 - [`../tc_pwr.sv`](../tc_pwr.sv.md) — 현재 권장 전력 셀
-- [`cluster_pwr_cells.sv`](cluster_pwr_cells.sv.md) — 유사한 `cluster_*` 레거시 래퍼
+- [`cluster_pwr_cells.sv`](cluster_pwr_cells.sv.md) — 동일한 `cluster_*` 레거시 래퍼
